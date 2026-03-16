@@ -1,13 +1,21 @@
-import { nanoid } from 'nanoid';
+import crypto from 'crypto';
+
 
 export function generateOrderNumber(): string {
   const timestamp = Date.now().toString(36).toUpperCase();
-  const random = nanoid(6).toUpperCase();
+  const random = crypto.randomUUID().split('-')[0].toUpperCase();
   return `ORD-${timestamp}-${random}`;
 }
 
 export function sanitizeInput(input: string): string {
-  return input.trim().replace(/[<>]/g, '');
+  // Properly escapes HTML entities to prevent XSS attacks
+  return input
+    .trim()
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
 }
 
 export function validateEmail(email: string): boolean {
@@ -16,8 +24,10 @@ export function validateEmail(email: string): boolean {
 }
 
 export function validatePhone(phone: string): boolean {
-  const cleaned = phone.replace(/\D/g, '');
-  return cleaned.length >= 10 && cleaned.length <= 13;
+  // Strict validation for Kenyan phone numbers
+  // Matches: 07.., 01.., 2547.., +2541..
+  const kenyaPhoneRegex = /^(?:254|\+254|0)?(7|1)\d{8}$/;
+  return kenyaPhoneRegex.test(phone.replace(/\s+/g, ''));
 }
 
 export function validatePassword(password: string): { valid: boolean; message?: string } {
@@ -36,15 +46,24 @@ export function validatePassword(password: string): { valid: boolean; message?: 
   return { valid: true };
 }
 
+// Rate Limiter
+
 const rateLimitStore = new Map<string, { count: number; resetTime: number }>();
 
 export function rateLimit(
   identifier: string,
   maxRequests: number = 100,
-  windowMs: number = 900000
+  windowMs: number = 900000 // 15 minutes
 ): boolean {
   const now = Date.now();
   const record = rateLimitStore.get(identifier);
+
+  // Memory Leak Prevention: Randomly clean up expired records 10% of the time
+  if (Math.random() < 0.1) {
+    for (const [key, val] of rateLimitStore.entries()) {
+      if (now > val.resetTime) rateLimitStore.delete(key);
+    }
+  }
 
   if (!record || now > record.resetTime) {
     rateLimitStore.set(identifier, { count: 1, resetTime: now + windowMs });
@@ -59,14 +78,18 @@ export function rateLimit(
   return true;
 }
 
+
+// Formatting utilities
+
 export function formatPrice(amount: number): string {
   return new Intl.NumberFormat('en-KE', {
     style: 'currency',
     currency: 'KES',
+    minimumFractionDigits: 0, // Removes the .00 for cleaner UI on whole amounts
   }).format(amount);
 }
 
-export function formatDate(date: Date): string {
+export function formatDate(date: Date | string): string {
   return new Intl.DateTimeFormat('en-KE', {
     year: 'numeric',
     month: 'long',
