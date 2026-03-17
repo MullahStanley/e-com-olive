@@ -1,6 +1,7 @@
 import mongoose from 'mongoose';
 
-const MONGODB_URI = process.env.MONGODB_URI;
+// 1. Cast as string here to satisfy TypeScript's strict mode across all function closures
+const MONGODB_URI = process.env.MONGODB_URI as string;
 
 if (!MONGODB_URI) {
   throw new Error('Please define the MONGODB_URI environment variable inside .env');
@@ -15,7 +16,7 @@ declare global {
   };
 }
 
-// Retrieve the cached connection, or initialize it if it's the first run
+// Retrieve the cached connection, or initialize if it's the first run
 let cached = global.mongooseCache;
 
 if (!cached) {
@@ -23,7 +24,7 @@ if (!cached) {
 }
 
 async function dbConnect(): Promise<typeof mongoose> {
-  // 1. If we already have a connection, return it immediately
+  // 1. If there is a connection, return it immediately
   if (cached.conn) {
     return cached.conn;
   }
@@ -37,8 +38,9 @@ async function dbConnect(): Promise<typeof mongoose> {
       socketTimeoutMS: 45000,
     };
 
+    // Because of assertion at the top, MONGODB_URI is accepted without errors
     cached.promise = mongoose.connect(MONGODB_URI, opts).then((mongooseInstance) => {
-      console.log('✅ MongoDB connected successfully');
+      console.log('✅ MongoDB connected successfully'); 
       return mongooseInstance;
     });
   }
