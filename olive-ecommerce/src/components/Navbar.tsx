@@ -4,18 +4,19 @@ import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { ShoppingCart, User as UserIcon, Search, Menu, X, LogOut, Package } from 'lucide-react';
-import toast from 'react-hot-toast';
 
-// Importing the types we created earlier (adjust path as needed)
-import type { User, CartItem } from '../types'; 
+// 1. Import our custom auth hook and type
+import { useAuth } from '@/context/AuthContext';
+import type { CartItem } from '@/types'; 
 
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [cartCount, setCartCount] = useState(0);
-  const [user, setUser] = useState<User | null>(null);
   const router = useRouter();
 
-  // 1. Stabilized function with useCallback for safe event listener binding
+  // 2. Destructure everything we need directly from the global provider!
+  const { user, logout, isLoading } = useAuth();
+
   const loadCart = useCallback(() => {
     try {
       const cart: CartItem[] = JSON.parse(localStorage.getItem('cart') || '[]');
@@ -27,41 +28,14 @@ export default function Navbar() {
     }
   }, []);
 
-  const checkAuth = useCallback(async () => {
-    try {
-      const res = await fetch('/api/auth/me');
-      if (res.ok) {
-        const data = await res.json();
-        setUser(data.user);
-      }
-    } catch (error) {
-      console.error('Auth check failed:', error);
-    }
-  }, []);
-
   useEffect(() => {
-    checkAuth();
     loadCart();
     
     // Listen for cart updates from other components
     window.addEventListener('cartUpdated', loadCart);
     return () => window.removeEventListener('cartUpdated', loadCart);
-  }, [checkAuth, loadCart]);
+  }, [loadCart]);
 
-  const handleLogout = async () => {
-    try {
-      const res = await fetch('/api/auth/logout', { method: 'POST' });
-      if (!res.ok) throw new Error('Logout failed');
-      
-      setUser(null);
-      toast.success('Logged out successfully');
-      router.push('/');
-    } catch (error) {
-      toast.error('Logout failed');
-    }
-  };
-
-  // 2. Extracted SearchBar to prevent duplicating the form for Desktop/Mobile
   const SearchBar = ({ isMobile = false }: { isMobile?: boolean }) => {
     const [searchQuery, setSearchQuery] = useState('');
 
@@ -110,22 +84,27 @@ export default function Navbar() {
               Products
             </Link>
             
-            {user ? (
+            {/* 3. Render Cart Icon once for ALL users to keep code DRY */}
+            <Link href="/cart" className="relative">
+              <ShoppingCart className="text-gray-700 hover:text-blue-600" size={24} />
+              {cartCount > 0 && (
+                <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
+                  {cartCount}
+                </span>
+              )}
+            </Link>
+
+            {/* 4. Handle Auth States gracefully */}
+            {isLoading ? (
+              // Show a subtle loading placeholder to prevent layout shift
+              <div className="h-8 w-24 bg-gray-100 animate-pulse rounded-lg"></div>
+            ) : user ? (
               <>
                 {user.role === 'admin' && (
                   <Link href="/admin" className="text-gray-700 hover:text-blue-600 font-medium transition">
                     Admin
                   </Link>
                 )}
-                
-                <Link href="/cart" className="relative">
-                  <ShoppingCart className="text-gray-700 hover:text-blue-600" size={24} />
-                  {cartCount > 0 && (
-                    <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
-                      {cartCount}
-                    </span>
-                  )}
-                </Link>
 
                 <div className="relative group">
                   <button className="flex items-center space-x-2 text-gray-700 hover:text-blue-600 focus:outline-none">
@@ -138,7 +117,7 @@ export default function Navbar() {
                       Track Order
                     </Link>
                     <button
-                      onClick={handleLogout}
+                      onClick={logout} // Use context logout
                       className="flex items-center w-full px-4 py-2 text-gray-700 hover:bg-gray-100"
                     >
                       <LogOut size={18} className="mr-2" />
@@ -149,14 +128,6 @@ export default function Navbar() {
               </>
             ) : (
               <>
-                <Link href="/cart" className="relative">
-                  <ShoppingCart className="text-gray-700 hover:text-blue-600" size={24} />
-                  {cartCount > 0 && (
-                    <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
-                      {cartCount}
-                    </span>
-                  )}
-                </Link>
                 <Link href="/login" className="text-gray-700 hover:text-blue-600 font-medium transition">
                   Login
                 </Link>
@@ -191,7 +162,9 @@ export default function Navbar() {
                 Cart {cartCount > 0 && `(${cartCount})`}
               </Link>
               
-              {user ? (
+              {isLoading ? (
+                <div className="h-6 w-32 bg-gray-100 animate-pulse rounded"></div>
+              ) : user ? (
                 <>
                   {user.role === 'admin' && (
                     <Link href="/admin" className="text-gray-700 hover:text-blue-600 font-medium" onClick={() => setMenuOpen(false)}>
@@ -203,7 +176,7 @@ export default function Navbar() {
                   </Link>
                   <button
                     onClick={() => {
-                      handleLogout();
+                      logout();
                       setMenuOpen(false);
                     }}
                     className="text-left text-gray-700 hover:text-blue-600 font-medium"

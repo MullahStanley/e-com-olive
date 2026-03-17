@@ -1,0 +1,39 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* 1. Moved custom html/body styles into the base layer */
+@layer base {
+  html,
+  body {
+    @apply max-w-[100vw] overflow-x-hidden text-gray-900 antialiased;
+  }
+}
+
+/* 2. Moved reusable UI elements to the components layer */
+@layer components {
+  .btn-primary {
+    @apply bg-blue-600 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-200 
+           hover:bg-blue-700 
+           focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 
+           disabled:opacity-60 disabled:cursor-not-allowed;
+  }
+  
+  .btn-secondary {
+    @apply bg-gray-200 text-gray-800 font-semibold py-3 px-6 rounded-lg transition-all duration-200 
+           hover:bg-gray-300 
+           focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 
+           disabled:opacity-60 disabled:cursor-not-allowed;
+  }
+  
+  .input-field {
+    @apply w-full px-4 py-3 bg-white border border-gray-300 rounded-lg transition-all duration-200 
+           focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent 
+           disabled:bg-gray-50 disabled:text-gray-500 disabled:cursor-not-allowed;
+  }
+  
+  .card {
+    @apply bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden transition-all duration-300 
+           hover:shadow-lg;
+  }
+}
