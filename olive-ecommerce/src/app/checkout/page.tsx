@@ -20,7 +20,6 @@ export default function CheckoutPage() {
   const [formData, setFormData] = useState({
     name: '',
     phone: '',
-    address: '',
     city: '',
     postalCode: '',
     mpesaPhone: '',
