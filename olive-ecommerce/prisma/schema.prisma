@@ -1,0 +1,179 @@
+// Odoo-inspired ERP schema on PostgreSQL (partners, products, sale orders, stock moves)
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  user
+  admin
+}
+
+enum OrderStatus {
+  pending
+  processing
+  shipped
+  delivered
+  cancelled
+}
+
+enum PaymentStatus {
+  pending
+  completed
+  failed
+  refunded
+}
+
+enum StockMoveType {
+  in
+  out
+}
+
+/// res.partner — customers and staff
+model Partner {
+  id            String     @id @default(cuid())
+  email         String     @unique
+  password      String
+  name          String
+  role          Role       @default(user)
+  phone         String?
+  address       String?
+  loginAttempts Int        @default(0)
+  lockUntil     DateTime?
+  lastLogin     DateTime?
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+  saleOrders    SaleOrder[]
+
+  @@map("partners")
+}
+
+/// product.category
+model ProductCategory {
+  id        String    @id @default(cuid())
+  name      String    @unique
+  slug      String    @unique
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  products  Product[]
+
+  @@map("product_categories")
+}
+
+/// product.template (single variant per product for simplicity)
+model Product {
+  id          String           @id @default(cuid())
+  name        String
+  slug        String           @unique
+  sku         String?          @unique
+  description String
+  price       Decimal          @db.Decimal(12, 2)
+  categoryId  String?
+  category    ProductCategory? @relation(fields: [categoryId], references: [id])
+  categoryName String
+  images      String[]
+  stockQty    Int              @default(0)
+  rating      Float            @default(0)
+  reviewCount Int              @default(0)
+  featured    Boolean          @default(false)
+  active      Boolean          @default(true)
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  orderLines  SaleOrderLine[]
+  stockMoves  StockMove[]
+
+  @@index([categoryName])
+  @@index([active, featured])
+  @@map("products")
+}
+
+/// sale.order
+model SaleOrder {
+  id                    String               @id @default(cuid())
+  orderNumber           String               @unique
+  partnerId             String
+  partner               Partner              @relation(fields: [partnerId], references: [id])
+  status                OrderStatus          @default(pending)
+  paymentStatus         PaymentStatus        @default(pending)
+  stripeSessionId       String?              @unique
+  stripePaymentIntentId String?
+  subtotal              Decimal              @db.Decimal(12, 2)
+  shippingAmount        Decimal              @db.Decimal(12, 2)
+  total                 Decimal              @db.Decimal(12, 2)
+  shippingName          String
+  shippingPhone         String
+  shippingAddress       String
+  shippingCity          String
+  shippingPostalCode    String?
+  lines                 SaleOrderLine[]
+  trackingEvents        OrderTrackingEvent[]
+  stockMoves            StockMove[]
+  payments              PaymentTransaction[]
+  createdAt             DateTime             @default(now())
+  updatedAt             DateTime             @updatedAt
+
+  @@index([partnerId])
+  @@index([status, paymentStatus])
+  @@map("sale_orders")
+}
+
+/// sale.order.line
+model SaleOrderLine {
+  id          String    @id @default(cuid())
+  orderId     String
+  productId   String
+  productName String
+  unitPrice   Decimal   @db.Decimal(12, 2)
+  quantity    Int
+  imageUrl    String
+  order       SaleOrder @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product     Product   @relation(fields: [productId], references: [id])
+
+  @@map("sale_order_lines")
+}
+
+/// stock.move — inventory ledger (Odoo-style)
+model StockMove {
+  id        String        @id @default(cuid())
+  productId String
+  orderId   String?
+  quantity  Int
+  moveType  StockMoveType
+  reference String
+  createdAt DateTime      @default(now())
+  product   Product       @relation(fields: [productId], references: [id])
+  order     SaleOrder?    @relation(fields: [orderId], references: [id])
+
+  @@index([productId])
+  @@map("stock_moves")
+}
+
+model OrderTrackingEvent {
+  id        String    @id @default(cuid())
+  orderId   String
+  status    String
+  message   String
+  createdAt DateTime  @default(now())
+  order     SaleOrder @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@map("order_tracking_events")
+}
+
+/// account.payment — Stripe payment records
+model PaymentTransaction {
+  id            String        @id @default(cuid())
+  orderId       String
+  stripeEventId String?       @unique
+  amount        Decimal       @db.Decimal(12, 2)
+  status        PaymentStatus
+  metadata      Json?
+  createdAt     DateTime      @default(now())
+  order         SaleOrder     @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@map("payment_transactions")
+}

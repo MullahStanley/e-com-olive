@@ -1,56 +1,43 @@
 import { NextRequest, NextResponse } from 'next/server';
-import dbConnect from '@/lib/mongodb';
-import Product from '@/models/Product';
+import prisma from '@/lib/prisma';
+import { serializeProduct } from '@/lib/erp';
 
-// Prevent Next.js from statically caching this route during build
 export const dynamic = 'force-dynamic';
 
 export async function GET(req: NextRequest) {
   try {
-    await dbConnect();
-
     const { searchParams } = new URL(req.url);
-    const search = searchParams.get('search');
+    const search = searchParams.get('search')?.trim();
     const category = searchParams.get('category');
     const featured = searchParams.get('featured');
-    const limit = parseInt(searchParams.get('limit') || '20');
+    const limit = Math.min(parseInt(searchParams.get('limit') || '20', 10), 100);
 
-    // 1. Base Query: ONLY show active products to public users
-    const query: Record<string, any> = { 
-      isActive: true 
-    };
+    const products = await prisma.product.findMany({
+      where: {
+        active: true,
+        ...(category && category !== 'All' ? { categoryName: category } : {}),
+        ...(featured === 'true' ? { featured: true } : {}),
+        ...(search
+          ? {
+              OR: [
+                { name: { contains: search, mode: 'insensitive' } },
+                { description: { contains: search, mode: 'insensitive' } },
+              ],
+            }
+          : {}),
+      },
+      orderBy: { createdAt: 'desc' },
+      take: limit,
+    });
 
-    // 2. Flexible Regex Search (matches partial words in name or description)
-    if (search && search.trim() !== '') {
-      const searchRegex = new RegExp(search.trim(), 'i'); // 'i' makes it case-insensitive
-      query.$or = [
-        { name: searchRegex },
-        { description: searchRegex }
-      ];
-    }
-
-    // 3. Category Filter (ignore if 'All')
-    if (category && category !== 'All') {
-      query.category = category;
-    }
-
-    // 4. Featured Filter
-    if (featured === 'true') {
-      query.isFeatured = true; // Make sure this matches your Schema (isFeatured vs featured)
-    }
-
-    // 5. Execute query with .lean() for maximum read performance
-    const products = await Product.find(query)
-      .limit(limit)
-      .sort({ createdAt: -1 })
-      .lean();
-
-    return NextResponse.json({ products }, { status: 200 });
-
+    return NextResponse.json(
+      { products: products.map(serializeProduct) },
+      { status: 200 }
+    );
   } catch (error) {
     console.error('Products fetch error:', error);
     return NextResponse.json(
-      { error: 'Failed to fetch products. Please try again later.' }, 
+      { error: 'Failed to fetch products. Please try again later.' },
       { status: 500 }
     );
   }

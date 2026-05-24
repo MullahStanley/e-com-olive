@@ -10,25 +10,21 @@ import { AuthProvider } from '@/context/AuthContext';
 const inter = Inter({ subsets: ['latin'], display: 'swap' });
 
 export const metadata: Metadata = {
-  title: 'ShopHub | Modern E-Commerce in Kenya',
-  description: 'Secure online shopping with M-Pesa and card payments. Fast delivery across Kenya.',
-  keywords: 'ecommerce, online shopping, Kenya, M-Pesa, electronics, ShopHub',
-  
-  // Open Graph data for rich social media sharing (WhatsApp, Facebook, etc.)
+  title: 'ShopHub | Modern E-Commerce',
+  description: 'Secure online shopping with Stripe payments and fast delivery.',
+  keywords: 'ecommerce, online shopping, Stripe, electronics, ShopHub',
   openGraph: {
     title: 'ShopHub | Modern E-Commerce',
-    description: 'Secure online shopping with M-Pesa and fast delivery.',
-    url: 'https://shophub.co.ke', // Replace with actual domain
+    description: 'Secure online shopping powered by Stripe.',
+    url: 'https://shophub.example.com',
     siteName: 'ShopHub',
-    locale: 'en_KE',
+    locale: 'en_US',
     type: 'website',
   },
-  
-  // Twitter card data
   twitter: {
     card: 'summary_large_image',
     title: 'ShopHub | Modern E-Commerce',
-    description: 'Secure online shopping with M-Pesa and fast delivery.',
+    description: 'Secure online shopping powered by Stripe.',
   },
 };
 

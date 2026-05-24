@@ -1,0 +1,19 @@
+@import "tailwindcss" reference;
+
+@layer components {
+  .home-hero {
+    @apply relative bg-gradient-to-br from-blue-600 via-blue-700 to-blue-900 text-white overflow-hidden;
+  }
+
+  .home-hero-inner {
+    @apply relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 md:py-32;
+  }
+
+  .home-feature-card {
+    @apply text-center;
+  }
+
+  .home-feature-icon {
+    @apply inline-flex items-center justify-center w-20 h-20 rounded-2xl mb-6 transition-all duration-300 shadow-sm;
+  }
+}

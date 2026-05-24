@@ -1,0 +1,19 @@
+@import "tailwindcss" reference;
+
+@layer components {
+  .navbar-root {
+    @apply bg-white border-b border-gray-100 sticky top-0 z-40 shadow-sm;
+  }
+
+  .navbar-inner {
+    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+
+  .navbar-link {
+    @apply text-gray-700 hover:text-blue-600 font-medium transition-colors;
+  }
+
+  .navbar-cart-badge {
+    @apply absolute -top-2 -right-2 bg-blue-600 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center;
+  }
+}

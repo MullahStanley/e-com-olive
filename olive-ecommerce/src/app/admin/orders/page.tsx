@@ -161,11 +161,7 @@ export default function AdminOrdersPage() {
                       </td>
                       <td className="p-4">
                         <div className="flex items-center gap-2 text-sm font-medium">
-                          {order.paymentMethod === 'mpesa' ? (
-                            <span className="text-green-600 bg-green-50 px-2 py-0.5 rounded">M-Pesa</span>
-                          ) : (
-                            <span className="text-blue-600 bg-blue-50 px-2 py-0.5 rounded">Card</span>
-                          )}
+                          <span className="text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded">Stripe</span>
                           <span className={`${order.paymentStatus === 'completed' ? 'text-green-600' : 'text-yellow-600'}`}>
                             • {order.paymentStatus}
                           </span>

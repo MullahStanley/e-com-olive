@@ -1,5 +1,6 @@
 'use client';
 
+import '@/styles/components/navbar.css';
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -65,8 +66,8 @@ export default function Navbar() {
   };
 
   return (
-    <nav className="bg-white shadow-md sticky top-0 z-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <nav className="navbar-root shadow-md">
+      <div className="navbar-inner">
         <div className="flex items-center justify-between h-16">
           
           {/* Logo */}
@@ -80,7 +81,7 @@ export default function Navbar() {
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-6">
-            <Link href="/products" className="text-gray-700 hover:text-blue-600 font-medium transition">
+            <Link href="/products" className="navbar-link">
               Products
             </Link>
             
@@ -88,7 +89,7 @@ export default function Navbar() {
             <Link href="/cart" className="relative">
               <ShoppingCart className="text-gray-700 hover:text-blue-600" size={24} />
               {cartCount > 0 && (
-                <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
+                <span className="navbar-cart-badge bg-red-500">
                   {cartCount}
                 </span>
               )}

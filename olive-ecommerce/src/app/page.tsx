@@ -1,5 +1,6 @@
 'use client';
 
+import '@/styles/pages/home.css';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { ShoppingBag, Shield, Truck, CreditCard, ChevronRight, Star, ArrowRight } from 'lucide-react';
@@ -47,7 +48,7 @@ export default function HomePage() {
         <div className="absolute inset-0 bg-black opacity-10"></div>
         <div className="absolute inset-0 bg-gradient-to-t from-blue-900/50 to-transparent"></div>
         
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 md:py-32">
+        <div className="home-hero-inner">
           <div className="text-center space-y-8 flex flex-col items-center">
             <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-md px-4 py-2 rounded-full text-sm font-medium border border-white/20 shadow-sm">
               <Star className="fill-yellow-400 text-yellow-400" size={16} aria-hidden="true" />
@@ -61,7 +62,7 @@ export default function HomePage() {
             </h1>
             
             <p className="text-xl md:text-2xl text-blue-100 max-w-2xl text-center leading-relaxed">
-              Your trusted online marketplace with secure M-Pesa payments and lightning-fast delivery.
+              Your trusted online marketplace with secure Stripe payments and lightning-fast delivery.
             </p>
             
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center pt-8 w-full sm:w-auto">
@@ -102,7 +103,7 @@ export default function HomePage() {
                 <Shield className="text-blue-600 group-hover:text-white transition-colors" size={40} aria-hidden="true" />
               </div>
               <h3 className="font-bold text-xl mb-3 text-gray-900">100% Secure</h3>
-              <p className="text-gray-600 leading-relaxed">Bank-level encryption for all payments via M-Pesa and cards.</p>
+              <p className="text-gray-600 leading-relaxed">Bank-level encryption for all payments via Stripe.</p>
             </div>
             
             <div className="text-center group">
@@ -118,7 +119,7 @@ export default function HomePage() {
                 <CreditCard className="text-purple-600 group-hover:text-white transition-colors" size={40} aria-hidden="true" />
               </div>
               <h3 className="font-bold text-xl mb-3 text-gray-900">Flexible Payment</h3>
-              <p className="text-gray-600 leading-relaxed">M-Pesa, Visa, MasterCard — pay securely however you want.</p>
+              <p className="text-gray-600 leading-relaxed">Cards, Apple Pay, Google Pay — powered by Stripe Checkout.</p>
             </div>
             
             <div className="text-center group">

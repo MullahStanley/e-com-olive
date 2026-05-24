@@ -137,7 +137,7 @@ function TrackOrderContent() {
                 <div className="text-sm space-y-2">
                   <div className="flex justify-between">
                     <span className="text-gray-500">Method:</span>
-                    <span className="font-medium text-gray-900">{order.paymentMethod === 'mpesa' ? 'M-Pesa' : 'Card'}</span>
+                    <span className="font-medium text-gray-900">Stripe</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-500">Status:</span>

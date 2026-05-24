@@ -149,7 +149,7 @@ export default function CartPage() {
 
               <div className="mt-6 flex items-center justify-center text-sm text-gray-500">
                 <ShieldCheck size={18} className="text-green-500 mr-2" />
-                <span>Secure checkout powered by M-Pesa</span>
+                <span>Secure checkout powered by Stripe</span>
               </div>
             </div>
           </div>

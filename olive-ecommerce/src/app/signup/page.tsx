@@ -49,9 +49,8 @@ export default function SignupPage() {
       return;
     }
 
-    const phoneRegex = /^(?:254|\+254|0)?(7|1)\d{8}$/;
-    if (formData.phone && !phoneRegex.test(formData.phone)) {
-      toast.error('Please enter a valid Kenyan phone number for M-Pesa');
+    if (formData.phone && formData.phone.trim().length < 7) {
+      toast.error('Please enter a valid phone number');
       return;
     }
 
@@ -161,7 +160,7 @@ export default function SignupPage() {
             {/* Phone Number */}
             <div>
               <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1.5">
-                M-Pesa Phone Number <span className="text-gray-400 font-normal">(Optional)</span>
+                Phone Number <span className="text-gray-400 font-normal">(Optional)</span>
               </label>
               <div className="relative">
                 <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} aria-hidden="true" />
